@@ -20,6 +20,10 @@ timesheetRouter.route('/')
     var year = date.getFullYear();
     var month = date.getMonth();
     
+    var yearString = date.getFullYear().toString();
+    var monthString = date.getMonth().toString();
+    var currentMonthString = yearString.concat(monthString);
+    
     //Let's try to find the timesheet
     Timesheets.find({'ownedBy': req.decoded._id, 'year': year, 'month': month}, function (err, timesheet) {
         if (err) next(err);
@@ -40,14 +44,78 @@ timesheetRouter.route('/')
             }
             
             var plannedToSpend = 0; // will be needed to initialize the statistics
+            
+            //var duetoYear = parseInt(req.params.duetomonth.substring(0, 4)); 
+            //var duetoMonth = parseInt(req.params.duetomonth.substring(4, 6));
+                
             for (var i=0; i<template.length; i++){
-                var item = {
-                    itemName: template[i].expensename,
-                    amountPlanned : template[i].amount,
-                    amountPaid : 0
+                // check if the expense is applicable for this month
+                console.log("template item's next month: " + template[i].nextmonth);
+                console.log("this month from calendar: " + month);
+                
+                var yearInTemplate = '9999';
+                var monthInTemplate = '12';
+                
+                if (typeof template[i].duetomonth !== 'undefined')
+                    {
+                        yearInTemplate = template[i].duetomonth.toString().substring(0, 4);
+                        monthInTemplate = template[i].duetomonth.toString().substring(4, 6);
+                    }
+                
+                var duetoYear = parseInt(yearInTemplate);
+                var duetoMonth = parseInt(monthInTemplate);
+                
+                //var duetoMonth = template[i].duetomonth;
+                console.log("CurrentYear: " + year);
+                console.log("CurrentMonth: " + month);
+                console.log("yearInTemplate: " + duetoYear);
+                console.log("monthInTemplate: " + duetoMonth);
+                console.log("typeof duetoMonth: " + typeof duetoMonth)
+                
+                if ( template[i].nextmonth === (month+1) && ( 
+                    typeof duetoMonth === 'undefined' || ( year < duetoYear ) || ( year === duetoYear && month+1 <= duetoMonth ) ) ){
+                    console.log("Expense applicable for this month!");
+                    var item = {
+                        itemName: template[i].expensename,
+                        amountPlanned : template[i].amount,
+                        amountPaid : 0,
+                        expenseid : template[i]._id
+                    }
+                    plannedToSpend += parseFloat(template[i].amount);
+                    // refresh the expenses here
+                    // calculating next month
+                    var newNextMonth = template[i].nextmonth + 12/template[i].frequency;
+                    if ( newNextMonth > 12 ) { 
+                        newNextMonth = newNextMonth - 12;
+                    }
+                    console.log("New next month: " + newNextMonth);
+                    
+                    //ASYNC FUNCTION
+                    var updateExpenses = function(id, newNextMonth)
+                    {
+                        console.log("ASYNC OPERATION: update expenses function begins")
+                    
+                        Expenses.findById(id, function (err, expense) {
+                        if (err) next(err);
+                        
+                        console.log("ASYNC OPERATION STEP1: init nextmonth")
+                        expense.nextmonth = newNextMonth;
+                        console.log("ASYNC OPERATION New next month: " + newNextMonth);
+                        expense.save(function (err, expense) {
+                            if (err) next(err);    
+                            console.log('ASYNC OPERATION Expense nextmonth parameter updated!');
+                        });
+                    });
+                    }
+                    
+                    //ASYNC
+                    updateExpenses(template[i]._id, newNextMonth);
+                    
+                    timesheet.items.push(item);
+                    
+                } else {
+                    console.log("Expense not applicable for this month!");
                 }
-                plannedToSpend += parseFloat(template[i].amount);
-                timesheet.items.push(item);
             }
                 
             console.log("plannedToSpend: " + plannedToSpend);
@@ -83,8 +151,8 @@ timesheetRouter.route('/:yearMonth')
 .all(Verify.verifyOrdinaryUser) //this will decode the req
 .get(function (req, res, next) {
     //Let's try to find the timesheet
-    year = parseInt(req.params.yearMonth.substring(0, 4)); 
-    month = parseInt(req.params.yearMonth.substring(4, 6));
+    var year = parseInt(req.params.yearMonth.substring(0, 4)); 
+    var month = parseInt(req.params.yearMonth.substring(4, 6));
     Timesheets.find({'ownedBy': req.decoded._id, 'year': year, 'month': month}, function (err, timesheet) {
         if (err) next(err);
         
@@ -110,8 +178,8 @@ timesheetRouter.route('/:timesheetId')
             err.status = 404;
             return next(err);
         } else {
-            timesheet.items.push(req.body);
-            timesheet.save(function (err, timesheet) {
+            timesheet.items.push(req.body); // belepusholjuk
+            timesheet.save(function (err, timesheet) { //elmentjuk
                 if (err) next(err);
                 console.log('Item Added!');
                 // we have to update the statistics

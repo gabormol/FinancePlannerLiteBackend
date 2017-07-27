@@ -15,10 +15,20 @@ var User = new Schema({
       type: String,
       default: ''
     },
+    currencySymbol: {
+      type: String,
+      default: '$'
+    },
+    currencyDecimals: {
+      type: Number,
+      default: 2
+    },
     admin:   {
         type: Boolean,
         default: false
     }
+},{
+    timestamps: true
 });
 
 User.methods.getName = function() {

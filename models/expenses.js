@@ -22,11 +22,22 @@ var expenseSchema = new Schema({
         type: Number,
         min: 1,
         max: 12,
-        required: true
+        required: false
     },
     createdate: {
         type: Date,
-        required: true
+        required: false
+    },
+    nextmonth: {
+        type: Number,
+        min: 0,
+        max: 11,
+        required: false
+    },
+    duetomonth: {
+        type: Number,
+        min: 0,
+        required: false
     }
 }, {
     timestamps: true

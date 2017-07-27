@@ -36,8 +36,10 @@ expenseRouter.route('/')
         "ownedBy" : req.decoded._id,
         "expensename" : req.body.expensename,
 	    "amount" : req.body.amount,
-	    "frequency" : 12,
-	    "createdate" : new Date()
+	    "frequency" : req.body.frequency,
+	    "createdate" : new Date(),
+        "nextmonth" : req.body.nextmonth,
+        "duetomonth" : req.body.duetomonth
     }
     
      Expenses.create(createdExpense, function (err, expense) {
@@ -74,14 +76,25 @@ expenseRouter.route('/:expenseId')
 })
 
 .put(function (req, res, next) {
-    Expenses.update({'ownedBy': req.decoded._id, '_id': req.params.expenseId}, {
-        $set: req.body
-    }, {
-        new: true
-    }, function (err, expense) {
-        if (err) next(err);
-        res.json(expense);
-    });
+    console.log(req.body);
+    var notAllowedFreq = [5, 7, 8, 9, 10, 11];
+    var validFreq = notAllowedFreq.indexOf(req.body.frequency) === -1;
+    if (validFreq){
+        console.log("frequency is valid");
+        Expenses.update({'ownedBy': req.decoded._id, '_id': req.params.expenseId}, {
+            $set: req.body
+        }, {
+            upsert: true
+        }, function (err, expense) {
+            if (err) next(err);
+            res.json(expense);
+        });
+    } else {
+        console.log("frequency is invalid!");
+        var err = new Error('The provided frequency is invalid! Valid frequencies are: 1, 2, 3, 4, 6, 12');
+            err.status = 404;
+            return next(err);
+    }
 })
   
 

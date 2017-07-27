@@ -21,6 +21,10 @@ var itemSchema = new Schema({
     paid: {
         type: Boolean,
         default: false
+    },
+    expenseid: {
+        type: String,
+        default: false
     }
 });
 
