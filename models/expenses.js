@@ -31,7 +31,7 @@ var expenseSchema = new Schema({
     nextmonth: {
         type: Number,
         min: 0,
-        max: 11,
+        max: 12,
         required: false
     },
     duetomonth: {

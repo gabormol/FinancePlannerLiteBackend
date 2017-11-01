@@ -87,7 +87,8 @@ timesheetRouter.route('/')
                     var newNextMonth = template[i].nextmonth + 12/template[i].frequency;
                     if ( newNextMonth > 12 ) { 
                         newNextMonth = newNextMonth - 12;
-                    }
+                    } 
+                    
                     console.log("New next month: " + newNextMonth);
                     
                     //ASYNC FUNCTION
