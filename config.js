@@ -1,10 +1,10 @@
 module.exports = {
     'secretKey': '',
-    //'mongoUrl' : 'mongodb://localhost:27017/financeplanner',
-    'mongoUrl' : '',
+    'mongoUrl' : 'mongodb://localhost:27017/financeplanner',
+    //'mongoUrl' : '',
     'facebook': {
         clientID: '',
         clientSecret: '',
-        callbackURL: ''
+        callbackURL: 'https://localhost:3443/users/facebook/callback'
     }
 }

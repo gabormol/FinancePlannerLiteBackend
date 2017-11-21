@@ -39,6 +39,10 @@ router.post('/register', function (req, res) {
         });
 });
 
+router.post('/resetpass', function (req, res) {
+        
+});
+
 router.post('/login', function (req, res, next) {
     passport.authenticate('local', function(err, user, info) {
         if (err) {
