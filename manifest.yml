@@ -2,4 +2,4 @@
 applications:
  - name: TestFP1
    random-route: true
-   memory: 128M
+   memory: 256M
