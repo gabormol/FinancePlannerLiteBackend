@@ -4,8 +4,8 @@ module.exports = {
     //'secretKey': '58fb3b0e9e77d8001400257e',
     'mongoUrl' : '',
     'facebook': {
-        clientID: '729651967195752',
-        clientSecret: 'be89352c6ee7a05fd5efc022d563d214',
+        clientID: '',
+        clientSecret: '',
         callbackURL: 'https://localhost:3443/users/facebook/callback'
     }
 }
